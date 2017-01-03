@@ -41,6 +41,7 @@ public class PieChartRenderer extends DataRenderer {
      * circle
      */
     protected Paint mHolePaint;
+    protected Paint mCircleAroundPaint;
     protected Paint mTransparentCirclePaint;
     protected Paint mValueLinePaint;
 
@@ -75,6 +76,11 @@ public class PieChartRenderer extends DataRenderer {
         mHolePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mHolePaint.setColor(Color.WHITE);
         mHolePaint.setStyle(Style.FILL);
+
+        mCircleAroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mCircleAroundPaint.setColor(Color.WHITE);
+        mCircleAroundPaint.setStyle(Style.FILL);
+        mCircleAroundPaint.setStrokeWidth(1f);
 
         mTransparentCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mTransparentCirclePaint.setColor(Color.WHITE);
@@ -122,29 +128,15 @@ public class PieChartRenderer extends DataRenderer {
     @Override
     public void drawData(Canvas c) {
 
-        int width = (int) mViewPortHandler.getChartWidth();
-        int height = (int) mViewPortHandler.getChartHeight();
-
-        if (mDrawBitmap == null
-                || (mDrawBitmap.get().getWidth() != width)
-                || (mDrawBitmap.get().getHeight() != height)) {
-
-            if (width > 0 && height > 0) {
-
-                mDrawBitmap = new WeakReference<Bitmap>(Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444));
-                mBitmapCanvas = new Canvas(mDrawBitmap.get());
-            } else
-                return;
-        }
-
         mDrawBitmap.get().eraseColor(Color.TRANSPARENT);
 
         PieData pieData = mChart.getData();
 
         for (IPieDataSet set : pieData.getDataSets()) {
 
-            if (set.isVisible() && set.getEntryCount() > 0)
+            if (set.isVisible() && set.getEntryCount() > 0) {
                 drawDataSet(c, set);
+            }
         }
     }
 
@@ -615,6 +607,30 @@ public class PieChartRenderer extends DataRenderer {
         drawCenterText(c);
     }
 
+    @Override
+    public void drawFrame(Canvas c) {
+
+        // measure and allocate bitmap
+        int width = (int) mViewPortHandler.getChartWidth();
+        int height = (int) mViewPortHandler.getChartHeight();
+
+        if (mDrawBitmap == null
+                || (mDrawBitmap.get().getWidth() != width)
+                || (mDrawBitmap.get().getHeight() != height)) {
+
+            if (width > 0 && height > 0) {
+
+                mDrawBitmap = new WeakReference<Bitmap>(Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444));
+                mBitmapCanvas = new Canvas(mDrawBitmap.get());
+            } else
+                return;
+        }
+
+        if(mChart.isDrawCircleAroundEnabled()) {
+            drawCircleAround(c);
+        }
+    }
+
     private Path mHoleCirclePath = new Path();
 
     /**
@@ -654,6 +670,23 @@ public class PieChartRenderer extends DataRenderer {
                 // reset alpha
                 mTransparentCirclePaint.setAlpha(alpha);
             }
+            MPPointF.recycleInstance(center);
+        }
+    }
+
+    protected void drawCircleAround(Canvas c) {
+
+        if (mChart.isDrawCircleAroundEnabled() && mBitmapCanvas != null) {
+            float radius = mChart.getRadius();
+            float frameRadius = radius + Utils.convertDpToPixel(mChart.getCircleAroundWidth()); //* (mChart.getHoleRadius() / 100);
+            MPPointF center = mChart.getCenterCircleBox();
+
+            mCircleAroundPaint.setColor(mChart.getCircleAroundColor());
+            mCircleAroundPaint.setStyle(Style.FILL);
+            mCircleAroundPaint.setStrokeWidth(1f);
+            c.drawCircle(center.x, center.y,
+                    frameRadius, mCircleAroundPaint);
+
             MPPointF.recycleInstance(center);
         }
     }
@@ -795,7 +828,6 @@ public class PieChartRenderer extends DataRenderer {
             final boolean accountForSliceSpacing = sliceSpace > 0.f && sliceAngle <= 180.f;
 
             mRenderPaint.setColor(set.getColor(index));
-
             final float sliceSpaceAngleOuter = visibleAngleCount == 1 ?
                     0.f :
                     sliceSpace / (Utils.FDEG2RAD * radius);
@@ -889,6 +921,24 @@ public class PieChartRenderer extends DataRenderer {
                             endAngleInner,
                             -sweepAngleInner
                     );
+                }
+
+                if(mChart.isDrawHighlithedSliceIndicatorEnabled()) {
+                    final float RADIUS_HIDE_VALUE = 1.5f;
+                    double[] translatedCenter = translatePoint(center.x, center.y, innerRadius * RADIUS_HIDE_VALUE, (endAngleInner - (endAngleInner - startAngleInner)/ 2) * Utils.FDEG2RAD);
+
+                    final RectF rectHalf = new RectF();
+                    rectHalf.left = (float) (highlightedCircleBox.left / 2 + translatedCenter[0] / 2);
+                    rectHalf.top = (float) (highlightedCircleBox.top / 2 + translatedCenter[1] / 2);
+                    rectHalf.right = (float) (highlightedCircleBox.right / 2 + translatedCenter[0] / 2);
+                    rectHalf.bottom = (float) (highlightedCircleBox.bottom / 2 + translatedCenter[1] / 2);
+
+                    if(sweepAngleInner > mChart.getMaxDegree()) {
+                        float start = (endAngleInner - (endAngleInner - startAngleInner)/ 2 - mChart.getTickAngle() / 2);
+                        c.drawArc(rectHalf, start, mChart.getTickAngle(), true, mRenderPaint);
+                    } else {
+                        c.drawArc(rectHalf, startAngleInner, sweepAngleInner, true, mRenderPaint);
+                    }
                 }
             } else {
 
@@ -990,5 +1040,16 @@ public class PieChartRenderer extends DataRenderer {
             mDrawBitmap.clear();
             mDrawBitmap = null;
         }
+    }
+
+    private double[] translatePoint(float sourceX, float sourceY, float radius, float angle) {
+        double x = sourceX + radius * Math.cos(angle);
+        double y = sourceY + radius * Math.sin(angle);
+
+        double[] point = new double[2];
+        point[0] = x;
+        point[1] = y;
+
+        return point;
     }
 }

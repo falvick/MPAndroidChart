@@ -158,6 +158,12 @@ public abstract class DataRenderer extends Renderer {
     public abstract void drawExtras(Canvas c);
 
     /**
+     * Draw frame around PieChart
+     * @param c
+     */
+    public abstract void drawFrame(Canvas c);
+
+    /**
      * Draws all highlight indicators for the values that are currently highlighted.
      *
      * @param c

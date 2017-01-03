@@ -1,5 +1,7 @@
 package com.github.mikephil.charting.renderer;
 
+import android.graphics.Canvas;
+
 import com.github.mikephil.charting.animation.ChartAnimator;
 import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.data.Entry;
@@ -92,5 +94,10 @@ public abstract class BarLineScatterCandleBubbleRenderer extends DataRenderer {
             max = entryTo == null ? 0 : dataSet.getEntryIndex(entryTo);
             range = (int) ((max - min) * phaseX);
         }
+    }
+
+    @Override
+    public void drawFrame(Canvas c) {
+        // TODO not yet implemented
     }
 }

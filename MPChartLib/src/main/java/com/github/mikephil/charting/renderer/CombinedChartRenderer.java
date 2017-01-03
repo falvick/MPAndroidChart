@@ -103,6 +103,11 @@ public class CombinedChartRenderer extends DataRenderer {
             renderer.drawExtras(c);
     }
 
+    @Override
+    public void drawFrame(Canvas c) {
+        // TODO not yet implemented
+    }
+
     protected List<Highlight> mHighlightBuffer = new ArrayList<Highlight>();
 
     @Override

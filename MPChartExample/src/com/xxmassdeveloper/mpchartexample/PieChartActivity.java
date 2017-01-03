@@ -19,7 +19,6 @@ import android.widget.TextView;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.components.Legend.LegendPosition;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
@@ -69,10 +68,14 @@ public class PieChartActivity extends DemoBase implements OnSeekBarChangeListene
         mChart.setHoleColor(Color.WHITE);
 
         mChart.setTransparentCircleColor(Color.WHITE);
-        mChart.setTransparentCircleAlpha(110);
+        mChart.setTransparentCircleAlpha(0);
 
-        mChart.setHoleRadius(58f);
-        mChart.setTransparentCircleRadius(61f);
+        mChart.setHoleRadius(40f);
+//        mChart.setTransparentCircleRadius(61f);
+
+        mChart.setDrawCircleAround(true);
+        mChart.setCircleAroundWidth(32f); // the same as selection shift+ 1
+        mChart.setCircleAroundColor(Color.WHITE);
 
         mChart.setDrawCenterText(true);
 
@@ -108,6 +111,7 @@ public class PieChartActivity extends DemoBase implements OnSeekBarChangeListene
         mChart.setEntryLabelColor(Color.WHITE);
         mChart.setEntryLabelTypeface(mTfRegular);
         mChart.setEntryLabelTextSize(12f);
+        mChart.setDrawHighlithedSliceIndicator(true);
     }
 
     @Override
@@ -202,7 +206,7 @@ public class PieChartActivity extends DemoBase implements OnSeekBarChangeListene
 
         PieDataSet dataSet = new PieDataSet(entries, "Election Results");
         dataSet.setSliceSpace(3f);
-        dataSet.setSelectionShift(5f);
+        dataSet.setSelectionShift(15f);
 
         // add a lot of colors
 

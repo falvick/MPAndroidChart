@@ -3,6 +3,7 @@ package com.github.mikephil.charting.charts;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -31,6 +32,7 @@ public class PieChart extends PieRadarChartBase<PieData> {
      * drawing the circle
      */
     private RectF mCircleBox = new RectF();
+    private RectF mCircleFrameBox = new RectF();
 
     /**
      * flag indicating if entry labels should be drawn or not
@@ -51,6 +53,36 @@ public class PieChart extends PieRadarChartBase<PieData> {
      * if true, the white hole inside the chart will be drawn
      */
     private boolean mDrawHole = true;
+
+    /**
+     * if true, the indicator will be drawn on highlighted slice
+     */
+    private boolean mDrawHighlithedSliceIndicator = true;
+
+    /**
+     * if true, the circle will be drawn around chart
+     */
+    private boolean mDrawCircleAround = true;
+
+    /**
+     * color in which frame around pichart will be drawn
+     */
+    private int mCircleAroundColor = Color.WHITE;
+
+    /**
+     * frame width in cricle around
+     */
+    private float mCircleAroundWidth = 30.0f;
+
+    /**
+     * max degree check when writing tick for highlighted slice
+     */
+    private int mMaxDegree = 110;
+
+    /**
+     * tick angle used if slice of pie is larger than {@link PieChart#getMaxDegree()}
+     */
+    private int mTickAngle = 75;
 
     /**
      * if true, the hole will see-through to the inner tips of the slices
@@ -123,12 +155,15 @@ public class PieChart extends PieRadarChartBase<PieData> {
         if (mData == null)
             return;
 
+        mRenderer.drawFrame(canvas);
+
         mRenderer.drawData(canvas);
+
+
+        mRenderer.drawExtras(canvas);
 
         if (valuesToHighlight())
             mRenderer.drawHighlighted(canvas, mIndicesToHighlight);
-
-        mRenderer.drawExtras(canvas);
 
         mRenderer.drawValues(canvas);
 
@@ -153,13 +188,19 @@ public class PieChart extends PieRadarChartBase<PieData> {
         MPPointF c = getCenterOffsets();
 
         float shift = mData.getDataSet().getSelectionShift();
+//        float frameShift = Utils.convertDpToPixel(15f); // TODO
 
         // create the circle box that will contain the pie-chart (the bounds of
-        // the pie-chart)
-        mCircleBox.set(c.x - radius + shift,
+        // the pie-chart) + frame shift
+        mCircleBox.set(c.x - radius + shift ,
                 c.y - radius + shift,
                 c.x + radius - shift,
                 c.y + radius - shift);
+
+        mCircleFrameBox.set(c.x - radius + mCircleAroundWidth,
+                c.y - radius + mCircleAroundWidth,
+                c.x + radius - mCircleAroundWidth,
+                c.y + radius - mCircleAroundWidth);
 
         MPPointF.recycleInstance(c);
     }
@@ -403,6 +444,99 @@ public class PieChart extends PieRadarChartBase<PieData> {
     }
 
     /**
+     * returns true if slice indicator is set to be drawn, false if not
+     *
+     * @return
+     */
+    public boolean isDrawHighlithedSliceIndicatorEnabled() {
+        return mDrawHighlithedSliceIndicator;
+    }
+
+    /**
+     * set this to true to draw the pie slice indicator
+     *
+     * @param enabled
+     */
+    public void setDrawHighlithedSliceIndicator(boolean enabled) {
+        this.mDrawHighlithedSliceIndicator = enabled;
+    }
+
+    /**
+     * returns true if frame around piechart is set to be drawn, false if not
+     * @return
+     */
+    public boolean isDrawCircleAroundEnabled() {
+        return mDrawCircleAround;
+    }
+
+    /**
+     * set this to true to draw frame around piechart
+     */
+    public void setDrawCircleAround(boolean enabled) {
+        this.mDrawCircleAround = enabled;
+    }
+
+    /**
+     * returns color of circle around pie chart
+     * @return
+     */
+    public int getCircleAroundColor() {
+        return mCircleAroundColor;
+    }
+
+    /**
+     * Setrs color of circle drawn as frame around pie chart
+     * @param mCircleAroundColor
+     */
+    public void setCircleAroundColor(int mCircleAroundColor) {
+        this.mCircleAroundColor = mCircleAroundColor;
+    }
+
+    public float getCircleAroundWidth() {
+        return mCircleAroundWidth;
+    }
+
+    /**
+     * gets tick angle used when {@link PieChart#getMaxDegree()} is exceeded
+     * @return
+     */
+    public int getTickAngle() {
+        return mTickAngle;
+    }
+
+    /**
+     * Sets tick angle used when {@link PieChart#getMaxDegree()} is exceeded
+     * @param mTickAngle
+     */
+    public void setTickAngle(int mTickAngle) {
+        this.mTickAngle = mTickAngle;
+    }
+
+    /**
+     * Returns maximum degree of slice with scaled tick
+     * @return mMaxDegree
+     */
+    public int getMaxDegree() {
+        return mMaxDegree;
+    }
+
+    /**
+     * Sets max degree for slice to have scaled tick
+     * @param mMaxDegree
+     */
+    public void setMaxDegree(int mMaxDegree) {
+        this.mMaxDegree = mMaxDegree;
+    }
+
+    /**
+     * Sets circle around width in dp
+     * @param mCircleAroundWidth
+     */
+    public void setCircleAroundWidth(float mCircleAroundWidth) {
+        this.mCircleAroundWidth = mCircleAroundWidth;
+    }
+
+    /**
      * Sets the text String that is displayed in the center of the PieChart.
      *
      * @param text
@@ -457,7 +591,7 @@ public class PieChart extends PieRadarChartBase<PieData> {
         if (mCircleBox == null)
             return 0;
         else
-            return Math.min(mCircleBox.width() / 2f, mCircleBox.height() / 2f);
+            return Math.min(mCircleBox.width() / 2f, mCircleBox.height() / 2f) - 50;
     }
 
     /**
