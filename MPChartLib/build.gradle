@@ -1,7 +1,9 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
-//apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.github.dcendents.android-maven'
 //apply plugin: 'realm-android'
+
+group='com.github.falvick'
 
 android {
     compileSdkVersion 24
@@ -11,7 +13,7 @@ android {
         minSdkVersion 9
         targetSdkVersion 24
         versionCode 3
-        versionName '3.0.1'
+        versionName '3.0.1-a'
     }
     buildTypes {
         release {
