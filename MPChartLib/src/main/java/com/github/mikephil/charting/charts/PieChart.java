@@ -591,7 +591,7 @@ public class PieChart extends PieRadarChartBase<PieData> {
         if (mCircleBox == null)
             return 0;
         else
-            return Math.min(mCircleBox.width() / 2f, mCircleBox.height() / 2f) - 50;
+            return Math.min(mCircleBox.width() / 2f, mCircleBox.height() / 2f);
     }
 
     /**

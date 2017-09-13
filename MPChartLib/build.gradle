@@ -7,13 +7,13 @@ group='com.github.falvick'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion '23.0.3'
+    buildToolsVersion '25.0.0'
     // resourcePrefix 'mpcht'
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 24
         versionCode 3
-        versionName '3.0.1-a'
+        versionName '3.0.1-d'
     }
     buildTypes {
         release {
